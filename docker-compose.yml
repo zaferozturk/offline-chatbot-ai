@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  chatbot:
+    build: .
+    container_name: chatbot
+    image: chatbot-app:latest
+    ports:
+      - "7860:7860"
+    volumes:
+      - .:/app
+    working_dir: /app
+    depends_on:
+      - mcp-server
+      - ssh-server
+    networks:
+      - zabunet
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    container_name: mcp-server
+    image: mcp-agent:latest
+    ports:
+      - "8080:8080"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    working_dir: /app
+    networks:
+      - zabunet
+
+  ssh-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh
+    container_name: ssh-server
+    image: ssh-server:latest
+    ports:
+      - "2222:22"
+    networks:
+      - zabunet
+
+networks:
+  zabunet:
+    driver: bridge
